@@ -11,36 +11,11 @@ using System.Web.Http;
 
 namespace SmsApiForwading.Controllers
 {
-    public class ValuesController : ApiController
+    public class ForwardController : ApiController
     {
-        // GET api/values
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/values/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST api/values
-        //public void Post([FromBody]string value)
-        //{
-        //}
-
-        // PUT api/values/5
-        public void Put(int id, [FromBody]string value)
-        {
-        }
-
-        // DELETE api/values/5
-        public void Delete(int id)
-        {
-        }
+        [Route("api/Forward/SendMessage")]
         [HttpPost]
-        public async Task<HttpResponseMessage> SendMessage(string phonenumber, string messagebody)
+        public async Task<HttpResponseMessage> SendMessage(ResquestSMS resquestSMS)
         {
             using (var client = new HttpClient())
             {
@@ -53,15 +28,14 @@ namespace SmsApiForwading.Controllers
                 RequestMessage request = new RequestMessage();
                 request.messages.Add(new Message()
                 {
-                    content = new Content() { body = "MyhomeWallet by Ecohome Financial: " + messagebody + " StdMsg&DataRtsAply Txt STOP to stop INFO for info" },
+                    content = new Content() { body = "MyhomeWallet by Ecohome Financial: " + resquestSMS.messagebody + " StdMsg&DataRtsAply Txt STOP to stop INFO for info" },
                     sendDate = DateTime.Now,
                     validUntil = DateTime.Now.AddMinutes(5),
-                    to = new To() { subscriber = new Subscriber() { phone = phonenumber } },
+                    to = new To() { subscriber = new Subscriber() { phone = resquestSMS.phonenumber } },
                     tracking = new Tracking() { code = "try123" }
                 });
 
                 return await client.PostAsJsonAsync("media/ws/rest/mbox/v1/reference/" + System.Configuration.ConfigurationManager.AppSettings["SubscriptionRef"] + "/message", request);
-
             }
         }
     }
